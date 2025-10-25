@@ -13,10 +13,24 @@ export function activate(context: ExtensionContext) {
             options: { execArgv: ['--nolazy', '--inspect=6009'] }
         }
     };
+    // 确保正确匹配.文言文件
     const clientOptions: LanguageClientOptions = {
-        documentSelector: [{ scheme: 'file', language: 'wenyan' }],
+        // 同时匹配wenyan语言ID和.文言文件扩展名
+        documentSelector: [
+            { scheme: 'file', language: 'wenyan' },
+            { scheme: 'file', pattern: '**/*.文言' }
+        ],
+        // 正确配置文件同步
         synchronize: {
-            fileEvents: workspace.createFileSystemWatcher('**/.文言')
+            // 监听所有文件变化
+            fileEvents: [
+                workspace.createFileSystemWatcher('**/*.文言'),
+                workspace.createFileSystemWatcher('**/*.wenyan')
+            ]
+        },
+        // 启用详细日志记录
+        initializationOptions: {
+            logLevel: 'verbose'
         }
     };
     client = new LanguageClient(

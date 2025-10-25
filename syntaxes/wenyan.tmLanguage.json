@@ -1,0 +1,126 @@
+{
+    "$schema": "https://raw.githubusercontent.com/martinring/tmlanguage/master/tmlanguage.json",
+    "name": "Wenyan",
+    "scopeName": "source.wenyan",
+    "patterns": [
+        {
+            "include": "#comments"
+        },
+        {
+            "include": "#strings"
+        },
+        {
+            "include": "#numbers"
+        },
+        {
+            "include": "#keywords"
+        },
+        {
+            "include": "#operators"
+        },
+        {
+            "include": "#punctuation"
+        },
+        {
+            "include": "#functions"
+        }
+    ],
+    "repository": {
+        "comments": {
+            "patterns": [
+                {
+                    "match": "^//.*$",
+                    "name": "comment.line.double-slash.wenyan"
+                },
+                {
+                    "begin": "^/\\*",
+                    "end": "\\*/$",
+                    "name": "comment.block.wenyan"
+                }
+            ]
+        },
+        "strings": {
+            "patterns": [
+                {
+                    "match": "《.*?》",
+                    "name": "string.quoted.double.wenyan"
+                },
+                {
+                    "match": "「.*?」",
+                    "name": "string.quoted.single.wenyan"
+                }
+            ]
+        },
+        "numbers": {
+            "patterns": [
+                {
+                    "match": "[一二三四五六七八九十百千万亿兆]+[之半余]?",
+                    "name": "constant.numeric.chinese.wenyan"
+                },
+                {
+                    "match": "\\d+\.\\d+",
+                    "name": "constant.numeric.float.wenyan"
+                },
+                {
+                    "match": "\\d+",
+                    "name": "constant.numeric.integer.wenyan"
+                }
+            ]
+        },
+        "keywords": {
+            "patterns": [
+                {
+                    "match": "(涵义|需知|求|已知|为|令|倘若|再若|再则|否则|当|时复行|复行|次|以)",
+                    "name": "keyword.control.wenyan"
+                },
+                {
+                    "match": "(故|既|乃|而|且|或|则|若|如|其)",
+                    "name": "keyword.operator.logical.wenyan"
+                },
+                {
+                    "match": "(真|假)",
+                    "name": "constant.language.boolean.wenyan"
+                }
+            ]
+        },
+        "operators": {
+            "patterns": [
+                {
+                    "match": "(是|不是|胜于|不及|且|并且|或|或者)",
+                    "name": "keyword.operator.wenyan"
+                },
+                {
+                    "match": "[加减乘除余]",
+                    "name": "keyword.operator.arithmetic.wenyan"
+                }
+            ]
+        },
+        "punctuation": {
+            "patterns": [
+                {
+                    "match": "[。，：；！？]+",
+                    "name": "punctuation.terminator.wenyan"
+                },
+                {
+                    "match": "[（）【】〔〕]",
+                    "name": "punctuation.bracket.wenyan"
+                }
+            ]
+        },
+        "functions": {
+            "patterns": [
+                {
+                    "match": "(得)([一二三四五六七八九十百千万亿兆]+[之半余]?)",
+                    "captures": {
+                        "1": {
+                            "name": "keyword.operator.wenyan"
+                        },
+                        "2": {
+                            "name": "entity.name.function.wenyan"
+                        }
+                    }
+                }
+            ]
+        }
+    }
+}

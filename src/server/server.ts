@@ -1,10 +1,11 @@
-import { createConnection, ProposedFeatures, InitializeParams, TextDocumentSyncKind, Diagnostic, DiagnosticSeverity, TextDocumentPositionParams, CompletionItem, CompletionItemKind } from 'vscode-languageserver/node';
+import { createConnection, ProposedFeatures, TextDocumentSyncKind, Diagnostic, DiagnosticSeverity, TextDocumentPositionParams, CompletionItem, CompletionItemKind, TextDocuments } from 'vscode-languageserver/node';
 import { TextDocument } from 'vscode-languageserver-textdocument';
 import { Lexer, Parser } from '../engine/src';
 import { WenyanError } from '../engine/src/engine/common/exceptions';
 
 const connection = createConnection(ProposedFeatures.all);
-const documents = new Map<string, TextDocument>();
+const documents = new TextDocuments(TextDocument);
+
 connection.onInitialize(() => {
     return {
         capabilities: {
@@ -20,33 +21,12 @@ connection.onInitialize(() => {
         }
     };
 });
-connection.onDidOpenTextDocument((params) => {
-    const document = TextDocument.create(
-        params.textDocument.uri,
-        params.textDocument.languageId,
-        params.textDocument.version,
-        params.textDocument.text
-    );
-    documents.set(document.uri, document);
-    validateDocument(document);
+documents.onDidChangeContent(change => {
+    validateDocument(change.document);
 });
-connection.onDidChangeTextDocument((params) => {
-    const uri = params.textDocument.uri;
-    const document = documents.get(uri);
-    if (document) {
-        const newDocument = TextDocument.update(
-            document,
-            params.contentChanges,
-            params.textDocument.version
-        );
-        documents.set(uri, newDocument);
-        validateDocument(newDocument);
-    }
-});
-connection.onDidCloseTextDocument((params) => {
-    documents.delete(params.textDocument.uri);
+documents.onDidClose(change => {
     connection.sendDiagnostics({
-        uri: params.textDocument.uri,
+        uri: change.document.uri,
         diagnostics: []
     });
 });
@@ -60,10 +40,8 @@ function validateDocument(document: TextDocument): void {
         parser.parse();
     } catch (error: any) {
         if (error instanceof WenyanError) {
-            const lineMatch = error.message.match(/第(\d+)行/);
-            const columnMatch = error.message.match(/第(\d+)列/);
-            const line = lineMatch ? parseInt(lineMatch[1]) - 1 : 0;
-            const column = columnMatch ? parseInt(columnMatch[1]) - 1 : 0;
+            const line = (error.line || 1) - 1;
+            const column = error.column || 0;
             const diagnostic: Diagnostic = {
                 severity: DiagnosticSeverity.Error,
                 range: {
@@ -170,4 +148,5 @@ connection.onHover((textDocumentPosition: TextDocumentPositionParams) => {
     };
 });
 
+documents.listen(connection);
 connection.listen();

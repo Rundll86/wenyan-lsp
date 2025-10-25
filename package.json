@@ -9,6 +9,13 @@
                 "extensions": [".文言"],
                 "aliases": ["文言", "Wenyan"]
             }
+        ],
+        "grammars": [
+            {
+                "language": "wenyan",
+                "scopeName": "source.wenyan",
+                "path": "./syntaxes/wenyan.tmLanguage.json"
+            }
         ]
     },
     "scripts": {
