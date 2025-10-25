@@ -3,33 +3,23 @@ import { TextDocument } from 'vscode-languageserver-textdocument';
 import { Lexer, Parser } from '../engine/src';
 import { WenyanError } from '../engine/src/engine/common/exceptions';
 
-// 创建连接
 const connection = createConnection(ProposedFeatures.all);
-
-// 用于存储文档
 const documents = new Map<string, TextDocument>();
-
 connection.onInitialize((params: InitializeParams) => {
     return {
         capabilities: {
             textDocumentSync: TextDocumentSyncKind.Incremental,
-            // 错误诊断
             publishDiagnostics: {
                 relatedInformation: true
             },
-            // 代码补全
             completionProvider: {
                 resolveProvider: true
             },
-            // 跳转到定义
             definitionProvider: true,
-            // 悬停提示
             hoverProvider: true
         }
     };
 });
-
-// 处理文档打开
 connection.onDidOpenTextDocument((params) => {
     const document = TextDocument.create(
         params.textDocument.uri,
@@ -40,8 +30,6 @@ connection.onDidOpenTextDocument((params) => {
     documents.set(document.uri, document);
     validateDocument(document);
 });
-
-// 处理文档变更
 connection.onDidChangeTextDocument((params) => {
     const uri = params.textDocument.uri;
     const document = documents.get(uri);
@@ -55,8 +43,6 @@ connection.onDidChangeTextDocument((params) => {
         validateDocument(newDocument);
     }
 });
-
-// 处理文档关闭
 connection.onDidCloseTextDocument((params) => {
     documents.delete(params.textDocument.uri);
     connection.sendDiagnostics({
@@ -64,31 +50,20 @@ connection.onDidCloseTextDocument((params) => {
         diagnostics: []
     });
 });
-
-// 验证文档并发布诊断
 function validateDocument(document: TextDocument): void {
     const text = document.getText();
     const diagnostics: Diagnostic[] = [];
-
     try {
-        // 使用引擎的词法分析器
         const lexer = new Lexer(text);
         const tokens = lexer.tokenize();
-
-        // 使用引擎的语法分析器
         const parser = new Parser(tokens);
         parser.parse();
     } catch (error: any) {
         if (error instanceof WenyanError) {
-            // 从错误消息中提取位置信息或使用默认位置
-
-            // 尝试从错误消息中匹配行号和列号
             const lineMatch = error.message.match(/第(\d+)行/);
             const columnMatch = error.message.match(/第(\d+)列/);
-
             const line = lineMatch ? parseInt(lineMatch[1]) - 1 : 0;
             const column = columnMatch ? parseInt(columnMatch[1]) - 1 : 0;
-
             const diagnostic: Diagnostic = {
                 severity: DiagnosticSeverity.Error,
                 range: {
@@ -106,7 +81,6 @@ function validateDocument(document: TextDocument): void {
             };
             diagnostics.push(diagnostic);
         } else {
-            // 处理其他错误
             const diagnostic: Diagnostic = {
                 severity: DiagnosticSeverity.Error,
                 range: {
@@ -119,28 +93,20 @@ function validateDocument(document: TextDocument): void {
             diagnostics.push(diagnostic);
         }
     }
-
-    // 发送诊断结果
     connection.sendDiagnostics({
         uri: document.uri,
         diagnostics
     });
 }
-
-// 处理代码补全请求
 connection.onCompletion((textDocumentPosition: TextDocumentPositionParams) => {
     const document = documents.get(textDocumentPosition.textDocument.uri);
     if (!document) {
         return [];
     }
-
-    // 获取当前行的文本，用于上下文感知的补全
     const line = document.getText({
         start: { line: textDocumentPosition.position.line, character: 0 },
         end: { line: textDocumentPosition.position.line, character: textDocumentPosition.position.character }
     });
-
-    // 文言关键词补全列表（基于engine目录中的实际实现）
     const keywords: CompletionItem[] = [
         { label: '涵义', kind: CompletionItemKind.Keyword, detail: '函数定义', documentation: '定义函数' },
         { label: '需知', kind: CompletionItemKind.Keyword, detail: '参数定义', documentation: '声明函数参数' },
@@ -171,22 +137,14 @@ connection.onCompletion((textDocumentPosition: TextDocumentPositionParams) => {
     });
     return filteredKeywords;
 });
-
-// 处理代码补全详情请求
 connection.onCompletionResolve(item => {
-    // 可以在这里提供更详细的补全信息
     return item;
 });
-
-// 处理跳转定义请求
 connection.onDefinition((textDocumentPosition: TextDocumentPositionParams) => {
     const document = documents.get(textDocumentPosition.textDocument.uri);
     if (!document) {
         return null;
     }
-
-    // 这里可以实现变量定义的查找逻辑
-    // 简单示例：返回当前位置作为定义位置
     return {
         uri: textDocumentPosition.textDocument.uri,
         range: {
@@ -195,20 +153,15 @@ connection.onDefinition((textDocumentPosition: TextDocumentPositionParams) => {
         }
     };
 });
-
-// 处理悬停提示请求
 connection.onHover((textDocumentPosition: TextDocumentPositionParams) => {
     const document = documents.get(textDocumentPosition.textDocument.uri);
     if (!document) {
         return null;
     }
-
-    // 简单示例：返回当前行的文本作为悬停提示
     const line = document.getText({
         start: { line: textDocumentPosition.position.line, character: 0 },
         end: { line: textDocumentPosition.position.line + 1, character: 0 }
     });
-
     return {
         contents: {
             kind: 'markdown',
@@ -217,5 +170,4 @@ connection.onHover((textDocumentPosition: TextDocumentPositionParams) => {
     };
 });
 
-// 启动连接
 connection.listen();
