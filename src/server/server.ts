@@ -5,7 +5,7 @@ import { WenyanError } from '../engine/src/engine/common/exceptions';
 
 const connection = createConnection(ProposedFeatures.all);
 const documents = new Map<string, TextDocument>();
-connection.onInitialize((params: InitializeParams) => {
+connection.onInitialize(() => {
     return {
         capabilities: {
             textDocumentSync: TextDocumentSyncKind.Incremental,
