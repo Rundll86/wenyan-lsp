@@ -1,0 +1,7 @@
+{
+    "name": "wenyan-lsp",
+    "version": "1.0.0",
+    "dependencies": {
+        "tgkw": "^1.0.0"
+    }
+}
