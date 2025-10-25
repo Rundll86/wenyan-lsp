@@ -1,7 +1,34 @@
 {
     "name": "wenyan-lsp",
     "version": "1.0.0",
+    "main": "out/client/extension.js",
+    "contributes": {
+        "languages": [
+            {
+                "id": "wenyan",
+                "extensions": [".文言"],
+                "aliases": ["文言", "Wenyan"]
+            }
+        ]
+    },
+    "scripts": {
+        "compile": "tsc -b",
+        "watch": "tsc -b -w",
+        "package": "vsce package",
+        "vscode:prepublish": "npm run compile"
+    },
     "dependencies": {
-        "tgkw": "^1.0.0"
+        "tgkw": "^1.0.0",
+        "vscode-languageclient": "^9.0.1",
+        "vscode-languageserver": "^9.0.1",
+        "vscode-languageserver-textdocument": "^1.0.11"
+    },
+    "devDependencies": {
+        "@types/node": "^20.11.30",
+        "@types/vscode": "^1.87.0",
+        "typescript": "^5.4.3"
+    },
+    "engines": {
+        "vscode": "^1.87.0"
     }
 }

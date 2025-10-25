@@ -1,0 +1,28 @@
+{
+    "version": "0.2.0",
+    "configurations": [
+        {
+            "name": "扩展",
+            "type": "extensionHost",
+            "request": "launch",
+            "runtimeExecutable": "${execPath}",
+            "args": ["--extensionDevelopmentPath=${workspaceFolder}"],
+            "outFiles": ["${workspaceFolder}/out/**/*.js"],
+            "preLaunchTask": "yarn: compile"
+        },
+        {
+            "name": "服务器",
+            "type": "node",
+            "request": "attach",
+            "port": 6009,
+            "restart": true,
+            "outFiles": ["${workspaceFolder}/out/**/*.js"]
+        }
+    ],
+    "compounds": [
+        {
+            "name": "扩展+服务器",
+            "configurations": ["扩展", "服务器"]
+        }
+    ]
+}
